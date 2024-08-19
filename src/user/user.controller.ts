@@ -8,7 +8,6 @@ import {
   Put,
   Delete,
   ParseIntPipe,
-  UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -21,8 +20,6 @@ import { Role } from 'src/enums/role.enum';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-
-  // @UseInterceptors(LogInterceptor)
   
   @Roles(Role.Admin)
   @Post()
@@ -33,27 +30,27 @@ export class UserController {
   @Roles(Role.Admin)
   @Get()
   async list() {
-    return this.userService.list()
+    return this.userService.findAll()
   }
 
   @Roles(Role.Admin)
   @Get(':id')
-  async show(@ParamId() id: number) {
-    return this.userService.show(id)
+  async show(@ParamId() id: string) {
+    return this.userService.findOne(id)
   }
 
   @Roles(Role.Admin)
   @Patch(':id')
-  async updatePartial(
+  async update(
     @Body() data: UpdateUserDto,
-    @ParamId() id: number,
+    @ParamId() id: string,
   ) {
     return this.userService.update(id, data)
   }
 
   @Roles(Role.Admin)
   @Delete(':id')
-  async delete(@ParamId() id: number) {
+  async delete(@ParamId() id: string) {
     return this.userService.delete(id);
   }
 }

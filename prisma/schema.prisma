@@ -8,13 +8,81 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String    @db.VarChar(63)
-  email     String    @db.VarChar(127)
-  password  String    @db.VarChar(127)
-  role      Int       @default(1)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cart      Cart?
 
   @@map("users")
+}
+
+
+model Color {
+  id          String       @id @default(uuid())
+  name        String
+  productSkus ProductSku[]
+
+  @@map("colors")
+}
+
+model Size {
+  id          String       @id @default(uuid())
+  name        String
+  productSkus ProductSku[]
+
+  @@map("sizes")
+}
+
+model Product {
+  id                 String       @id @default(uuid())
+  name               String
+  newProduct         Boolean?      @default(false)
+  description        String
+  longDescription    String?       
+  image              String
+  productSkus        ProductSku[]
+
+  @@map("products")
+
+}
+
+model ProductSku {
+  id        String     @id @default(uuid())
+  price              Float
+  discontPrice       Float?
+  discountPercentage Float?
+  sku       String     @unique
+  product   Product    @relation(fields: [productId], references: [id])
+  productId String
+  color     Color      @relation(fields: [colorId], references: [id])
+  colorId   String
+  itemsCart ItemCart[]
+  sizeId    String
+  size      Size       @relation(fields: [sizeId], references: [id])
+  quantity  Int
+
+  @@map("product_skus")
+}
+
+model Cart {
+  id     String     @id @default(uuid())
+  user   User       @relation(fields: [userId], references: [id])
+  userId String     @unique
+  items  ItemCart[]
+
+  @@map("cart")
+}
+
+model ItemCart {
+  id           String     @id @default(uuid())
+  cart         Cart       @relation(fields: [cartId], references: [id])
+  cartId       String
+  productSku   ProductSku @relation(fields: [productSkuId], references: [id])
+  productSkuId String
+  quantity     Int
+
+  @@map("itemCart")
 }

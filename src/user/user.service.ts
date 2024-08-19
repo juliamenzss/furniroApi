@@ -13,71 +13,68 @@ export class UserService {
     });
   }
 
-  async list() {
-    return this.prisma.user.findMany()
+  async findAll() {
+    return this.prisma.user.findMany();
   }
 
-  async show(id: number) {
-
+  async findOne(id: string) {
     await this.exists(id);
 
     return this.prisma.user.findUnique({
       where: {
-        id
-      }
+        id,
+      },
     });
   }
 
-
-  async update(id: number, {email, name, password, role}: UpdateUserDto) {
-
+  async update(id: string, { email, name, password, role }: UpdateUserDto) {
     await this.exists(id);
-  
 
     const data: any = {};
 
-    if(email) {
+    if (email) {
       data.email = email;
     }
 
-    if(name) {
+    if (name) {
       data.name = name;
     }
 
-    if(password) {
+    if (password) {
       data.password = password;
     }
 
-    if(role) {
+    if (role) {
       data.role = role;
     }
 
     return this.prisma.user.update({
       data,
       where: {
-        id
-      }
-    })
+        id,
+      },
+    });
   }
 
-  async delete(id: number) {
-
+  async delete(id: string) {
     await this.exists(id);
 
     return this.prisma.user.delete({
       where: {
-        id
-      }
-    })
+        id,
+      },
+    });
   }
 
-  async exists(id:number) {
-    if(!(await this.prisma.user.count({
-      where: {
-        id
-      }
-    }))) {
-      throw new NotFoundException(`User ${id} not found.`)
+  async exists(id: string) {
+    if (
+      !(await this.prisma.user.count({
+        where: {
+          id,
+        },
+      }))
+    ) {
+      throw new NotFoundException(`User ${id} not found.`);
     }
   }
 }
