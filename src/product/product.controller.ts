@@ -1,12 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 
+
+@ApiTags('products')
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
+  @ApiBody({ type: CreateProductDto })
   @Post()
   create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
@@ -29,17 +33,31 @@ export class ProductController {
   
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+  getProductById(@Param('id') id: string) {
+    return this.productService.getProductById(id);
+  }
+
+  @Get('sku/:id')
+  getProductSkuById(@Param('id') id: string) {
+    return this.productService.getProductSkuById(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(+id, updateProductDto);
+    return this.productService.updateProduct(id, updateProductDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  deleteSku(@Param('id') id: string) {
+    return this.productService.deleteSku(id);
+  }
+
+
+  @Delete(':id')
+  async deleteProduct(@Param('id') id: string): Promise<void> {
+    const product =  await this.productService.deleteProduct(id);
+    if (!product) {
+      throw new BadRequestException(`Product not found`);
+    }
   }
 }

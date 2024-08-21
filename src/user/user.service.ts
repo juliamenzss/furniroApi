@@ -1,13 +1,18 @@
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/modulePrisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Role } from 'src/enums/role.enum';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
-
-  async create(data: CreateUserDto) {
+  async create(data: CreateUserDto): Promise<User> {
+    const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } })
+    if (existingUser){
+      throw new BadRequestException('Email already in use')
+    }
     return this.prisma.user.create({
       data,
     });
@@ -16,6 +21,8 @@ export class UserService {
   async findAll() {
     return this.prisma.user.findMany();
   }
+
+
 
   async findOne(id: string) {
     await this.exists(id);
@@ -27,10 +34,11 @@ export class UserService {
     });
   }
 
-  async update(id: string, { email, name, password, role }: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const { email, name, password, role } = updateUserDto;
     await this.exists(id);
 
-    const data: any = {};
+    const data: Partial<UpdateUserDto> = {};
 
     if (email) {
       data.email = email;
@@ -56,7 +64,7 @@ export class UserService {
     });
   }
 
-  async delete(id: string) {
+  async remove(id: string) {
     await this.exists(id);
 
     return this.prisma.user.delete({
@@ -66,15 +74,15 @@ export class UserService {
     });
   }
 
-  async exists(id: string) {
-    if (
-      !(await this.prisma.user.count({
-        where: {
-          id,
-        },
-      }))
-    ) {
-      throw new NotFoundException(`User ${id} not found.`);
+  async exists(id: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found.`);
     }
   }
+
 }
+

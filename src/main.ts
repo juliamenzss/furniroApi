@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { PrismaService } from './prisma/prisma.service';
+import { PrismaService } from './modulePrisma/prisma.service';
 import { LogInterceptor } from './interceptors/log.interceptor';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
@@ -9,9 +9,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('Median')
-    .setDescription('The Median API description')
-    .setVersion('0.1')
+    .setTitle('Furniro Shop')
+    .setDescription('The API of Furniro Shop')
+    .setVersion('1.0')
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+    }, 'access-token')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

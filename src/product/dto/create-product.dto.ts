@@ -1,26 +1,31 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsString, IsNumber, IsOptional, IsUrl, IsBoolean, ArrayNotEmpty, ValidateNested } from 'class-validator';
-import { Url } from 'url';
 
 export class CreateProductDto {
+  @ApiProperty()
   @IsString()
   name: string;
 
+  @ApiProperty()
   @IsString()
   description: string;
 
+  @ApiProperty()
   @IsString()
   @IsOptional()
   longDescription?: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsBoolean()
   newProduct?: boolean;
 
+  @ApiProperty()
   @IsUrl()
   image: string;
 
-
+  @ApiProperty()
   @ValidateNested({ each: true })
   @Type(() => CreateProductSkuDto)
   @ArrayNotEmpty()
@@ -28,27 +33,36 @@ export class CreateProductDto {
 }
 
 export class CreateProductSkuDto {
+  @ApiProperty()
   @IsString()
   sku: string;
 
+  @ApiProperty()
   @IsString()
   colorId: string;
 
-  @IsOptional()
+  @ApiProperty()
   @IsString()
   sizeId: string;
 
+  @ApiProperty()
   @IsString()
   quantity: number;
 
+  @ApiProperty()
   @IsNumber()
   price: number;
 
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   discountPrice?: number;
 
+  @ApiProperty()
   @IsOptional()
   @IsBoolean()
   discountTag?: boolean;
+
+  @IsString()
+  id: any;
 }

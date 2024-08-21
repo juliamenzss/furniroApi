@@ -4,12 +4,16 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ProductModule } from './product/product.module';
 import { CartModule } from './cart/cart.module';
-import { ItemCartModule } from './item-cart/item-cart.module';
 
 @Module({
-  imports: [UserModule, AuthModule, ProductModule, CartModule, ItemCartModule],
+  imports: [
+    UserModule,
+    AuthModule,
+    ProductModule,
+    CartModule,
+  ],
   controllers: [],
   providers: [AppService],
-  exports: [AppService]
+  exports: [AppService],
 })
 export class AppModule {}
