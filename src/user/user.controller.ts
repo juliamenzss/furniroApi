@@ -2,13 +2,10 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Patch,
   Post,
-  Put,
   Delete,
-  ParseIntPipe,
-  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -52,19 +49,17 @@ export class UserController {
   ): Promise<User> {
     const user = this.userService.update(id, data);
     if (!user) {
-      throw new BadRequestException(`User not found`);
+      throw new NotFoundException(`User not found`);
     }
     return user;
   }
-
-
   // @Roles(Role.Admin)
   @Delete(':id')
   @ApiParam({ name: 'id', type: String, description: 'User ID' })
   async remove(@ParamId('id') id: string): Promise<void> {
     const user = this.userService.remove(id);
     if (!user) {
-      throw new BadRequestException(`User not found`);
+      throw new NotFoundException(`User not found`);
     }
   }
 }

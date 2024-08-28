@@ -5,6 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from 'src/enums/role.enum';
 import { User } from '@prisma/client';
 
+
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
@@ -85,4 +86,3 @@ export class UserService {
   }
 
 }
-

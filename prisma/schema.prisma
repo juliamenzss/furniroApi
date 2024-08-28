@@ -15,7 +15,6 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  cart      Cart?
 
   @@map("users")
 }
@@ -29,7 +28,7 @@ model Color {
 }
 
 model Size {
-  id          String      @id @default(uuid())
+  id          String       @id @default(uuid())
   name        String
   productSkus ProductSku[]
 
@@ -38,50 +37,63 @@ model Size {
 
 model Product {
   id              String       @id @default(uuid())
+  image           String
   name            String
-  newProduct      Boolean?     @default(false)
   description     String
   longDescription String?
-  image           String
   productSkus     ProductSku[]
 
   @@map("products")
 }
 
 model ProductSku {
-  id                 String     @id @default(uuid())
+  id                 String         @id @default(uuid())
+  imageSku           String?
   price              Float
-  discontPrice       Float?
+  discountPrice      Float?
   discountPercentage Float?
-  sku                String     @unique
-  product            Product    @relation(fields: [productId], references: [id])
+  newProduct         Boolean?       @default(false)
+  sku                String         @unique
+  product            Product        @relation(fields: [productId], references: [id])
   productId          String
-  color              Color      @relation(fields: [colorId], references: [id])
+  color              Color          @relation(fields: [colorId], references: [id])
   colorId            String
-  itemsCart          ItemCart[]
   sizeId             String
-  size               Size      @relation(fields: [sizeId], references: [id])
+  size               Size           @relation(fields: [sizeId], references: [id])
   quantity           Int
+  orderProduct       OrderProduct[]
 
   @@map("product_skus")
 }
 
-model Cart {
-  id     String     @id @default(uuid())
-  user   User       @relation(fields: [userId], references: [id])
-  userId String     @unique
-  items  ItemCart[]
+model Order {
+  id             String         @id @default(uuid())
+  name           String
+  lastName       String
+  email          String
+  zipCode        String
+  address        String
+  region         String
+  town           String
+  province       String
+  total          Int
+  payment        String
+  orderProducts  OrderProduct[]
+  addOnAddress   String?
+  addInformation String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
-  @@map("cart")
+  @@map("orders")
 }
 
-model ItemCart {
-  id           String     @id @default(uuid())
-  cart         Cart       @relation(fields: [cartId], references: [id])
-  cartId       String
-  productSku   ProductSku @relation(fields: [productSkuId], references: [id])
-  productSkuId String
-  quantity     Int
+model OrderProduct {
+  id        String     @id @default(uuid())
+  productId String
+  quantity  Int
+  orderId   String
+  product   ProductSku @relation(fields: [productId], references: [id])
+  order     Order      @relation(fields: [orderId], references: [id])
 
-  @@map("itemCart")
+  @@map("order_products")
 }

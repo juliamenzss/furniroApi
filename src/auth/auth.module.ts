@@ -13,6 +13,7 @@ import { AuthService } from './auth.service';
   UserModule,
   PrismaModule
 ],
+  exports:[AuthService],
   controllers: [AuthController],
   providers: [AuthService],
 })

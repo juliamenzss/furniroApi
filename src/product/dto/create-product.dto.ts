@@ -65,4 +65,7 @@ export class CreateProductSkuDto {
 
   @IsString()
   id: any;
+  discountPercentage: any;
+  newProduct: any;
+  image: any;
 }
