@@ -1,14 +1,59 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, Req, UnauthorizedException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { PrismaService } from 'src/modulePrisma/prisma.service';
+import { Order } from '@prisma/client';
+import { identity } from 'rxjs';
+
+
 
 @Injectable()
 export class OrderService {
   constructor(  private readonly prisma: PrismaService,
   ) {}
 
-  async create(createOrderDto: any) {
+// async createOrder(createOrderDto: any, userId: string): Promise<any> {
+//   const { products, ...orderData } = createOrderDto;
+
+//   for (const product of products as { productId: string; quantity: number }[]) {
+//     const existingProductSku = await this.prisma.productSku.findUnique({
+//       where: { id: product.productId },
+//     });
+
+//     if (!existingProductSku) {
+//       throw new NotFoundException(`Product SKU ID ${product.productId} not found.`);
+//     }
+//   }
+//     try {
+//       const order = await this.prisma.order.create({
+//         data: {
+//           ...orderData,
+//           userId,
+//           orderProducts: {
+//             create: products.map(product => ({
+//               productId: product.productId,
+//               quantity: product.quantity,
+//             })),
+//           },
+//         },
+//         include: {
+//           orderProducts: true,
+//         },
+//       });
+//         return order;
+//       } catch (error) {
+//             console.error(error); 
+//             throw new BadRequestException(`Error creating order`);
+//           }
+// }
+
+  async create(createOrderDto: any, @Req() req) {
     const { products, ...orderData } = createOrderDto;
+
+    const userId = req.user?.id;
+
+    if(!userId) {
+      throw new UnauthorizedException("User not authenticated");
+    }
 
     for (const product of products as { productId: string; quantity: number }[]) {
       const existingProductSku = await this.prisma.productSku.findUnique({
@@ -24,10 +69,11 @@ export class OrderService {
       const order = await this.prisma.order.create({
         data: {
           ...orderData,
+          userId,
           orderProducts: {
             create: products.map(product => ({
               productId: product.productId,
-              quantity: product.quantity,
+              quantity: product.quantity|| 1,
             })),
           },
         },
@@ -57,6 +103,20 @@ export class OrderService {
     });
   }
 
+
+  async findOrderByUser(userId: string) {
+
+     const order = await this.prisma.order.findMany({
+      where: { userId: userId},
+      include: {
+        orderProducts: true,
+      }
+    });
+    return order;
+  }
+
+
+
   async exists(id: string): Promise<void> {
     const order = await this.prisma.order.findUnique({
       where: { id },
@@ -66,4 +126,5 @@ export class OrderService {
       throw new NotFoundException(`Order with ID ${id} not found.`);
     }
   }
+
 }

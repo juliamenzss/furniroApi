@@ -8,10 +8,11 @@ import { User } from '@prisma/client';
 import { PrismaService } from 'src/modulePrisma/prisma.service';
 import { AuthRegisterDTO } from './dto/auth-register.dto';
 import { UserService } from 'src/user/user.service';
+import * as bcrypt from 'bcrypt';
+import { Role } from 'src/enums/role.enum';
 
 @Injectable()
 export class AuthService {
-
   private issuer = 'login';
   private audience = 'users';
 
@@ -28,6 +29,9 @@ export class AuthService {
           id: user.id,
           name: user.name,
           email: user.email,
+          role: user.role,
+          createAt: user.createdAt,
+          updateAt: user.updatedAt,
         },
         {
           expiresIn: '7 days',
@@ -39,7 +43,7 @@ export class AuthService {
     };
   }
 
-  checkToken(token: string) {
+  async checkToken(token: string) {
     try {
       const data = this.jwtService.verify(token, {
         audience: this.audience,
@@ -64,7 +68,6 @@ export class AuthService {
     const user = await this.prisma.user.findFirst({
       where: {
         email,
-        password,
       },
     });
 
@@ -72,12 +75,26 @@ export class AuthService {
       throw new UnauthorizedException('Invalid e-mail or password.');
     }
 
+    if (!(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('Invalid e-mail or password.');
+    }
     return this.createToken(user);
   }
 
   async register(data: AuthRegisterDTO) {
-    const user = await this.userService.create(data);
+    const existingUser = await this.prisma.user.findUnique({
+      where: {
+        email: data.email,
+      },
+    });
+    if (existingUser) {
+      throw new BadRequestException('Email in use');
+    }
 
-    return this.createToken(user);
+    const newUser = await this.userService.create({
+      ...data,
+      role: data.role ?? Role.User,
+    });
+    return this.createToken(newUser);
   }
 }

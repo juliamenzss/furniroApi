@@ -7,14 +7,11 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/modulePrisma/prisma.service';
 import { Product } from '@prisma/client';
-import { Roles } from 'src/decorators/roles.decorator';
-import { Role } from 'src/enums/role.enum';
 
 @Injectable()
 export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
-  @Roles(Role.Admin)
   async create(createProductDto: CreateProductDto) {
     const product = await this.prisma.product.create({
       data: {
@@ -25,35 +22,11 @@ export class ProductService {
       },
       include: { productSkus: true },
     });
-    
+
     if (!product) {
       throw new NotFoundException(`Error creating product`);
     }
     return product;
-  }
-
-  async findAll(page: number = 1, pageSize: number = 16) {
-    pageSize = Math.min(pageSize, 16);
-    const skip = (page - 1) * pageSize;
-
-    const [products, total] = await Promise.all([
-      this.prisma.product.findMany({
-        skip,
-        take: pageSize,
-        include: { productSkus: {
-          orderBy: [],
-        } },
-      }),
-      this.prisma.product.count(),
-    ]);
-
-    return {
-      products,
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-    };
   }
 
   async findAllSorted(
@@ -65,7 +38,7 @@ export class ProductService {
     const pageNumber = Number(page);
     const pageSizeNumber = Number(pageSize);
     const skip = (pageNumber - 1) * pageSizeNumber;
-  
+
     const queryOptions: any = {
       skip,
       take: pageSizeNumber,
@@ -80,7 +53,6 @@ export class ProductService {
       },
       orderBy: [],
     };
-  
 
     if (sortByPrice) {
       queryOptions.orderBy.push({
@@ -89,17 +61,17 @@ export class ProductService {
         },
       });
     }
-  
+
     if (sortByName) {
       queryOptions.orderBy.push({ name: sortByName });
     }
-  
+
     try {
       const [products, total] = await Promise.all([
         this.prisma.product.findMany(queryOptions),
         this.prisma.product.count(),
       ]);
-  
+
       return {
         products,
         total,
@@ -108,51 +80,64 @@ export class ProductService {
         totalPages: Math.ceil(total / pageSizeNumber),
       };
     } catch (error) {
-      console.error('Error in findAllSorted:', error);
       throw new BadRequestException('Invalid request parameters.');
     }
   }
 
   async getProductById(id: string) {
-    const product = await this.prisma.product.findUnique({ 
-      where: { id }, 
-      include: { 
-        productSkus: { 
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        productSkus: {
           include: {
-            color: true,  
+            color: true,
             size: true,
           },
-          orderBy: [] 
-        }
-      }
+          orderBy: [],
+        },
+      },
     });
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found!`);
     }
-    const total = await this.prisma.product.count(); 
+    const total = await this.prisma.product.count();
     return {
       product,
-      total
+      total,
     };
   }
-  
-  @Roles(Role.Admin)
+
   async getProductSkuById(id: string) {
     const productSku = await this.prisma.productSku.findUnique({
       where: { id },
-          include: {
-            color: true,  
-            size: true,
-          },
+      include: {
+        color: true,
+        size: true,
+      },
     });
-  
+
     if (!productSku) {
       throw new NotFoundException(`ID ${id} not found!`);
     }
     return productSku;
-}
+  }
 
-  @Roles(Role.Admin)
+  async findByName(name: string) {
+    const trimmedName = name.trim();
+    const product = await this.prisma.product.findFirst({
+      where: {
+        name: {
+          equals: trimmedName,
+          mode: 'insensitive',
+        },
+      },
+    });
+    if (!product) {
+      throw new NotFoundException(`Product not found!`);
+    }
+    return product;
+  }
+
   async updateProduct(
     id: string,
     updateProductDto: UpdateProductDto,
@@ -195,7 +180,6 @@ export class ProductService {
     }
   }
 
-  // @Roles(Role.Admin)
   async deleteProduct(id: string): Promise<void> {
     const product = await this.prisma.product.findUnique({
       where: { id },
@@ -212,7 +196,6 @@ export class ProductService {
     });
   }
 
-  // @Roles(Role.Admin)
   async deleteSku(id: string): Promise<void> {
     const productSku = await this.prisma.productSku.delete({
       where: { id },

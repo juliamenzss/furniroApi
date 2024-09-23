@@ -1,30 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/role.enum';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { RoleGuard } from 'src/guards/role.guard';
 
 @ApiTags('order')
 @ApiBearerAuth()
 @Controller('order')
+@UseGuards(AuthGuard, RoleGuard)
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
+  @Roles(Role.User)
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
+  create(@Body() createOrderDto: CreateOrderDto, @Req() req) {
+    return this.orderService.create(createOrderDto, req);
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.User)
   @Get()
   findAll() {
     return this.orderService.findAll();
   }
 
+  @Roles(Role.User)
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOrderById(@Param('id') id: string) {
     return this.orderService.findOne(id);
+  }
+
+  @Roles(Role.User)
+  @Get('user/:userId')
+  findOrderByUser(@Param('userId') userId: string) {
+    return this.orderService.findOrderByUser(userId);
   }
 }

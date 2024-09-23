@@ -1,6 +1,7 @@
 import { CreateUserDto } from "src/user/dto/create-user.dto";
-import { IsEmail, IsNotEmpty, IsString, Length, MinLength } from "class-validator";
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Length, MinLength } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import { Role } from "src/enums/role.enum";
 
 
 export class AuthRegisterDTO{
@@ -20,4 +21,9 @@ export class AuthRegisterDTO{
     @IsString()
     @MinLength(6)
     password: string
+
+    @ApiProperty({ enum: Role, required: false }) 
+    @IsEnum(Role)
+    @IsOptional()
+    role?: Role;
 }

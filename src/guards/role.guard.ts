@@ -1,20 +1,27 @@
-// import { UserService } from 'src/user/user.service';
-// import { AuthService } from './../auth/auth.service';
-// import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
-// import { Reflector } from '@nestjs/core';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { ROLES_KEY } from 'src/decorators/roles.decorator';
+import { Role } from 'src/enums/role.enum';
 
-// @Injectable()
-// export class RoleGuard implements CanActivate{
+@Injectable()
+export class RoleGuard implements CanActivate {
+  constructor(
+    private readonly reflector: Reflector
+  ) {}
 
-//   constructor(
-//     private readonly reflector: Reflector
+  async canActivate(context: ExecutionContext)
+  {
 
-//   ) {}
+    const requiridRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [context.getHandler(), context.getClass()])
 
-//   async canActivate(context: ExecutionContext) {
+    if(!requiridRoles) {
+      return true;
+    }
+    
+    const {user} = context.switchToHttp().getRequest();
+    
+    const rolesFilted = requiridRoles.filter(role => role === user.role)
 
-//     this.reflector.
-
-//     const request = context.switchToHttp().getRequest();   
-//   }
-// }
+    return rolesFilted.length > 0;
+  }
+}
