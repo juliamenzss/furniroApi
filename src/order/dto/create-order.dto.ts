@@ -6,7 +6,7 @@ class OrderProductDto {
     @ApiProperty()
     @IsNotEmpty()
     @IsString()
-    productId: string; 
+    productSkuId: string; 
   
     @ApiProperty()
     @IsNotEmpty()

@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
-function createSkuData(name: string, colorId: string, color: string, sizeId: string, size: string, price: number, discountPrice: number | null, discountPercentage: number | null, newProduct: boolean, quantity: number, imageSku: string, uniqueId: string) {
+function createSkuData(name: string, colorId: string, sizeId: string, price: number, discountPrice: number | null, discountPercentage: number | null, newProduct: boolean, quantity: number, imageSku: string, uniqueId: string) {
   return {
     sku: generateSKU(name, colorId, sizeId, uniqueId),
     color: { connect: { id: colorId } }, 
@@ -19,7 +19,7 @@ function createSkuData(name: string, colorId: string, color: string, sizeId: str
 }
 
 async function main() {
-  const ofwhiteColor = await prisma.color.create({ data: { name: 'ofwhite' } });
+  const offwhiteColor = await prisma.color.create({ data: { name: 'offWhite' } });
   const caramelColor = await prisma.color.create({ data: { name: 'Caramel' } });
   const blueColor = await prisma.color.create({ data: { name: 'Blue' } });
   const blackColor = await prisma.color.create({ data: { name: 'Black' } });
@@ -29,40 +29,68 @@ async function main() {
   const largeSize = await prisma.size.create({ data: { name: 'L' } });
   const extraLargeSize = await prisma.size.create({ data: { name: 'XL' } });
 
-  const products = [{
-          name: 'Ilusion',
-          description: 'Luxury big sofa',
-          longDescription: 'Setting the bar as one of the loudest speakers in its class, the Kilburn is a compact, stout-hearted hero with a well-balanced audio which boasts a clear midrange and extended highs for a sound.',
-          image: 'https://furniro-shop-images.s3.amazonaws.com/lolitoSofa.png',
-          productSkus: {
-            create: [
-              createSkuData('Ilusion Sofa', ofwhiteColor.id,'off-white', oneSize.id, 'OS', 14000.0, 7000.0, 50, false, 5, null, uuidv4()),
-            ],
-          }
-        }
+  const products = [
+        {
+               name: 'Louises Table',
+               description: 'Louises table',
+              longDescription: 'Setting the bar as one of the loudest speakers in its class, the Kilburn is a compact, stout-hearted hero with a well-balanced audio which boasts a clear midrange and extended highs for a sound.',
+               image: 'https://furniro.s3.amazonaws.com/respiraTable.png',
+               productSkus: {
+                 create: [
+                   createSkuData('Louises Table', caramelColor.id, oneSize.id, 3500.000, 2500.000, 30, false, 2, null, uuidv4()),
+                   createSkuData('ResLouisespira Table', blackColor.id, oneSize.id, 3500.000, 2500.000, 30, false, 2, null, uuidv4()),
+                 ],
+               },
+             },
+             {
+               name: 'Carmelita',
+               description: 'Stylish cafe chair',
+               longDescription: 'Setting the bar as one of the loudest speakers in its class, the Kilburn is a compact, stout-hearted hero with a well-balanced audio which boasts a clear midrange and extended highs for a sound.',
+               image: 'https://furniro.s3.amazonaws.com/leviosaChair.png',
+               productSkus: {
+                 create: [
+                   createSkuData('Carmelita Chair', caramelColor.id, oneSize.id, 2500.000, null, null, true, 5, null, uuidv4()),
+                 ],
+               },
+             },
+             {
+               name: 'Lolito',
+               description: 'Luxury big sofa',
+               image: 'https://furniro.s3.amazonaws.com/lolitoSofa.png',
+               productSkus: {
+                 create: [
+                   createSkuData('Lolito Sofa', offwhiteColor.id, oneSize.id, 14000.000, 7000.000, 50, false, 1, null, uuidv4()),
+                  ],
+                },
+              },
+              {
+                name: 'Asgaard Sofa',
+                description: 'Luxury big sofa',
+                longDescription: 'Setting the bar as one of the loudest speakers in its class, the Kilburn is a compact, stout-hearted hero with a well-balanced audio which boasts a clear midrange and extended highs for a sound.',
+                image: 'https://furniro.s3.amazonaws.com/asgaardBlueL.png',
+                productSkus: {
+                  create: [
+                    createSkuData('Asgaard sofa', blueColor.id, largeSize.id, 2500, null, null, false, 10, 'https://furniro.s3.amazonaws.com/asgaardBlueL.png', uuidv4()),
+                    createSkuData('Asgaard sofa', blueColor.id, extraSmallSize.id, 2500, null, null, false, 10, 'https://furniro.s3.amazonaws.com/asgaardBlueXl.png', uuidv4()),
+                    createSkuData('Asgaard sofa', caramelColor.id, largeSize.id, 2500, null, null, false, 10, 'https://furniro.s3.amazonaws.com/asgaardCaramelL.png', uuidv4()),
+                    createSkuData('Asgaard sofa', caramelColor.id, extraSmallSize.id, 2500, null, null, false, 10, 'https://furniro.s3.amazonaws.com/asgaardCaramelXs.png', uuidv4()),
+                  ],
+                },
+              },
       ];
-    // {
-    //   name: 'Benefit',
-    //   description: 'Luxury big sofa',
-    //   longDescription: 'Setting the bar as one of the loudest speakers in its class, the Kilburn is a compact, stout-hearted hero with a well-balanced audio which boasts a clear midrange and extended highs for a sound.',
-    //   image: 'https://furniro-shop-images.s3.amazonaws.com/asgaardBlueL.png',
-    //   productSkus: {
-    //     create: [
-    //       createSkuData('Asgaard sofa', blueColor.id, 'blue', largeSize.id, 'L', 250000.0, null, null, false, 3, 'https://furniro-shop-images.s3.amazonaws.com/asgaardBlueL.png', '001'),
-    //       createSkuData('Asgaard sofa', blueColor.id, 'blue',extraLargeSize.id, 'XL',250000.0, null, null, false, 3, 'https://furniro-shop-images.s3.amazonaws.com/asgaardBlueXl.png', '002'),
-    //       createSkuData('Asgaard sofa', blackColor.id, 'black',largeSize.id, 'L',250000.0, null, null, false, 3, 'https://furniro-shop-images.s3.amazonaws.com/asgaardBlackL.png', '003'),
-    //       createSkuData('Asgaard sofa', caramelColor.id, 'caramel',extraSmallSize.id, 'XS',250000.0, null, null, false, 3, 'https://furniro-shop-images.s3.amazonaws.com/asgaardCaramelXs.png', '004'),
-    //       createSkuData('Asgaard sofa', caramelColor.id, 'caramel',largeSize.id, 'L',250000.0, null, null, false, 3, 'https://furniro-shop-images.s3.amazonaws.com/asgaardCaramelL.png', '005'),
-    //     ],
-    //   },
-    // },
   
 
-  for (const product of products) {
-    await prisma.product.create({
-      data: product,
-    });
-  }
+      for (const product of products) {
+        await prisma.product.create({
+          data: {
+            name: product.name,
+            description: product.description,
+            longDescription: product.longDescription,
+            image: product.image,
+            productSkus: product.productSkus,
+          },
+        });
+      }
 }
 
 main()
@@ -74,34 +102,3 @@ main()
     await prisma.$disconnect();
   });
 
-
-   // {
-        //   name: 'Syltherine',
-        //   description: 'Stylish cafe chair',
-        //   image: 'https://furniro-shop-images.s3.amazonaws.com/syltherineChair.png',
-        //   productSkus: {
-        //     create: [
-        //       createSkuData('Syltherine Chair', 'White', 'OS', whiteColor.id, oneSize.id, 3500.000, 2500.000, 30, false, 1, null, uuidv4()),
-        //     ],
-        //   },
-        // },
-        // {
-        //   name: 'Leviosa',
-        //   description: 'Stylish cafe chair',
-        //   image: 'https://furniro-shop-images.s3.amazonaws.com/leviosaChair.png',
-        //   productSkus: {
-        //     create: [
-        //       createSkuData('Leviosa Chair', 'White', 'OS', whiteColor.id, oneSize.id, 2500.000, null, null, false, 1, null, uuidv4()),
-        //     ],
-        //   },
-        // },
-        // {
-        //   name: 'Lolito',
-        //   description: 'Luxury big sofa',
-        //   image: 'https://furniro-shop-images.s3.amazonaws.com/lolitoSofa.png',
-        //   productSkus: {
-        //     create: [
-        //       createSkuData('Lolito Sofa', 'White', 'OS', whiteColor.id, oneSize.id, 14000.000, 7000.000, 50, false, 1, null, uuidv4()),
-        //     ],
-        //   },
-        // },

@@ -56,9 +56,9 @@ export class ProductController {
   }
 
 
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
-  @Roles(Role.Admin)
+  // @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
+  // @Roles(Role.Admin)
   @Get('id/:id')
   async getProductById(@Param('id') id: string) {
     const { product, total } = await this.productService.getProductById(id);
@@ -69,9 +69,9 @@ export class ProductController {
   }
  
 
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
-  @Roles(Role.Admin)
+  // @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
+  // @Roles(Role.Admin)
   @Get('sku/:id')
   async getProductSkuById(@Param('id') id: string) {
     const product = await this.productService.getProductSkuById(id);
@@ -116,7 +116,7 @@ export class ProductController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.User)
   @Delete('sku/:id')
   async deleteSku(@Param('id') id: string): Promise<void> {
     await this.productService.deleteSku(id);
